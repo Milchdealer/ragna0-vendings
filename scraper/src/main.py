@@ -183,7 +183,7 @@ if __name__ == "__main__":
     session = Session()
 
     run_id = session.query(func.max(Vending.run_id)).one_or_none()
-    if run_id[0]:
+    if run_id[0] or run_id[0] == 0:
         run_id = run_id[0] + 1
     else:
         run_id = 0
