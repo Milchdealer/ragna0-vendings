@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from scraper.src.db import Vending, VendingEntry
 from api import crud, schema
 
-SQLITE_DB = os.getenv("RAGNA0_SQLITE_PATH", "./data/ragna0.db")
+SQLITE_DB = os.getenv("RAGNA0_SQLITE_PATH", "/data/ragna0.db")
 
 engine = create_engine(
     "sqlite:///%s" % SQLITE_DB, connect_args={"check_same_thread": False}
