@@ -7,7 +7,7 @@ from typing import Iterator
 
 import requests
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from db import Base, Vending, VendingEntry
@@ -30,7 +30,7 @@ def get_page_count(html: str) -> int:
 
     return int(pages[-1].encode_contents())
 
-def vending_page_scraper(page_num: int, sql_session):
+def vending_page_scraper(page_num: int, sql_session, run_id: int):
     """ Threaded function which scrapes a vending page. """
     url = VENDING_URL_FORMAT.format(page_num=page_num)
     r = requests.get(url)
@@ -56,6 +56,7 @@ def vending_page_scraper(page_num: int, sql_session):
             x=x.decode_contents(),
             y=y.decode_contents(),
             gender=gender.decode_contents().strip(),
+            run_id=run_id,
         )
         sql_session.add(vending)
         sql_session.commit()
@@ -176,9 +177,17 @@ if __name__ == "__main__":
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
 
-    engine = create_engine('sqlite:///%s' % SQLITE_DB)
+    engine = create_engine("sqlite:///%s" % SQLITE_DB)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
+    session = Session()
+
+    run_id = session.query(func.max(Vending.run_id)).one_or_none()
+    if run_id[0]:
+        run_id = run_id[0] + 1
+    else:
+        run_id = 0
+    logging.info("Run ID: %s", run_id)
     
     r = requests.get(BASE_URL)
     if r.status_code != 200:
@@ -190,4 +199,4 @@ if __name__ == "__main__":
 
     for page in range(page_count):
         logging.info("Scraping page %s", page + 1)
-        vending_page_scraper(page + 1, Session())
+        vending_page_scraper(page + 1, session, run_id)

@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-docker run -v ./data:/data ragna0
+DATA_FOLDER=`pwd`/data
+
+docker run --rm -v $DATA_FOLDER:/data ragna0

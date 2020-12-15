@@ -12,8 +12,8 @@ USER ragna0
 WORKDIR /ragna0
 
 COPY requirements.txt .
-COPY src .
-
 RUN pip install -r requirements.txt
+
+COPY src .
 
 CMD python3 main.py
